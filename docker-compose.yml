@@ -1,0 +1,62 @@
+version: "3.8"
+
+volumes:
+  db-data: ~
+
+x-php-config:
+  &php-config
+  build:
+    context: .
+    target: php
+    args:
+      - APP_ENV=${APP_ENV}
+  volumes:
+    - ./:/var/www
+  restart: unless-stopped
+
+services:
+  #Database
+  database:
+    container_name: main-db
+    image: postgres:16.3
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      PGDATA: ${DB_PG_DATA}
+    volumes:
+      - ./:/src
+      - ./db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - net
+
+  # PHP Service
+  php:
+    container_name: app
+    <<: *php-config
+    working_dir: /var/www
+    ports:
+      - "8000:8000"
+      - "9000:9000"
+    networks:
+      - net
+  # Nginx
+  nginx:
+    container_name: nanobase-nginx
+    image: "nginx:stable-alpine"
+    ports:
+      - "8101:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - .:/var/www
+      - ./etc/ssl/:/etc/ssl/
+      - ./nginx/ssl:/etc/nginx/ssl
+    networks:
+      - net
+
+networks:
+  net:
+    driver: bridge
