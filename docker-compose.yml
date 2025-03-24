@@ -39,7 +39,6 @@ services:
     working_dir: /var/www
     ports:
       - "8000:8000"
-      - "9000:9000"
     networks:
       - net
   # Nginx

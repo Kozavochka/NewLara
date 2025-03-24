@@ -30,6 +30,6 @@ COPY . .
 RUN chmod 777 .
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
 #ENV PORT=8000
 
