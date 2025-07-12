@@ -1,0 +1,73 @@
+version: "3.8"
+
+volumes:
+  db-data: ~
+
+x-php-config:
+  &php-config
+  build:
+    context: .
+    target: php
+    args:
+      - APP_ENV=${APP_ENV}
+  volumes:
+    - ./:/var/www
+  restart: unless-stopped
+
+services:
+  database:
+    container_name: db
+    image: postgres:15.3
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      PGDATA: ${DB_PG_DATA}
+    volumes:
+      - ./:/src
+      - ./db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - lara_app
+
+  # Redis Server
+  redis:
+    container_name: redis
+    image: redis:alpine
+    command: redis-server --appendonly yes --requirepass  "${REDIS_PASSWORD}"
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data/redis:/data
+    networks:
+      - lara_app
+
+  # PHP Service
+  php:
+    container_name: php
+    <<: *php-config
+    working_dir: /var/www
+    ports:
+      - "8000:8000"
+      - "9000:9000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - lara_app
+  # Nginx
+  nginx:
+    container_name: nginx
+    image: "nginx:stable-alpine"
+    ports:
+      - "80:80"
+      - "8101:80"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - .:/var/www
+    networks:
+      - lara_app
+
+networks:
+ lara_app:
+    driver: bridge
