@@ -21,4 +21,28 @@ Route::group([
     Route::post('me', [AuthController::class, 'me']);
 
 });
-
+Route::group(
+    attributes: [
+        'as' => 'central_api.',
+        'middleware' => ['api','auth:api'],
+    ],
+    routes: function () {
+        Route::group(
+            attributes: [
+                'as' => 'v1.',
+                'prefix' => '/v1',
+                'middleware' => [],
+            ],
+            routes: function () {
+                Route::group(
+                    attributes: [
+                        'as' => 'clients.',
+                    ],
+                    routes: function () {
+                        Route::group(attributes: [], routes: base_path(path: '/routes/api/v1/clients.php'));
+                    }
+                );
+            }
+        );
+    }
+);
