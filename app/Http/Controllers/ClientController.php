@@ -41,7 +41,7 @@ class ClientController extends ApiController
 
     public function update(Client $client, ClientUpdateRequest $request)
     {
-        $this->clientService->update($request->validated());
+        $this->clientService->update($client, $request->validated());
 
         return $this->response();
     }
