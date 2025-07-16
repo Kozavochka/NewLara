@@ -1,0 +1,33 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('real_estate_entity_parameters', function (Blueprint $table) {
+            $table->id();
+
+            $table->morphs('source');
+
+            $table->string('value');
+            $table->string('value_type');//TODO maybe enum
+
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('real_estate_entity_parameters');
+    }
+};
